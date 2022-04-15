@@ -44,9 +44,29 @@ begin
       var to_send := new HashSet<string>;
       var send_time := default(DateTime?);
       
+//      var last_update := new System.Collections.Concurrent.ConcurrentDictionary<string, DateTime>;
+      
       var update := procedure(ch: System.IO.WatcherChangeTypes; del,add: string)->
       begin
-        lock output do $'{ch}: -[{del}]+[{add}]'.Println;
+//        lock output do $'{ch}: -[{del}]+[{add}]'.Println;
+//        if add<>nil then
+//        begin
+//          var is_new_time := true;
+//          
+//          last_update.AddOrUpdate(add,
+//            System.IO.File.GetLastWriteTime,
+//            (key, prev_ut)->
+//            begin
+//              Result := System.IO.File.GetLastWriteTime(add);
+//              $'Last updated {prev_ut}:{prev_ut.Millisecond}'.Println;
+//              $'Curr updated {Result}:{Result.Millisecond}'.Println;
+//              is_new_time := Result<>prev_ut;
+//            end
+//          );
+//          
+//          if not is_new_time then exit;
+////          $'Last updated {send_time}:{send_time.Value.Millisecond}'.Println;
+//        end;
         lock to_send do
         begin
           if del<>nil then to_send.Remove(del);
