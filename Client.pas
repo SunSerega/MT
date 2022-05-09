@@ -56,8 +56,7 @@ begin
         on e: Exception do
         begin
           $'Failed to connect to {remoteEP}:'.Println;
-          Writeln(e);
-          Sleep(5000);
+          Println(e);
           continue;
         end;
       end;
