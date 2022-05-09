@@ -43,37 +43,51 @@ begin
     ipAddress := new System.Net.IPAddress(ip_bts);
     var remoteEP := new IPEndPoint(ipAddress, 10002);
     
-    var sock := new Socket(
-      AddressFamily.InterNetwork,
-      SocketType.Stream,
-      ProtocolType.Tcp
-    );
-    sock.Connect(remoteEP);
-    
-    var conn := new SockConnection(sock);
-    $'Connected to {conn}'.Println;
-    
     while true do
-    try
-      var fname := ReceiveFile(conn.CreateReader);
-      $'Running [{fname}]'.Println;
-      SubExecuters.RunFile(fname, nil,
-        l->Println($'[{fname}]: {l.s}'),
-        e->Println($'[{fname}]: {e}')
+    begin
+      var sock := new Socket(
+        AddressFamily.InterNetwork,
+        SocketType.Stream,
+        ProtocolType.Tcp
       );
-      $'Finished running [{fname}]'.Println;
-    except
-      on e: Exception do
-        if not conn.IsConnected then
+      try
+        sock.Connect(remoteEP);
+      except
+        on e: Exception do
         begin
-          $'Server disconnected'.Println;
-//          Println(e);
-          break;
-        end else
-        begin
-          'Test error:'.Println;
-          Println(e);
+          $'Failed to connect to {remoteEP}:'.Println;
+          Writeln(e);
+          Sleep(5000);
+          continue;
         end;
+      end;
+      
+      var conn := new SockConnection(sock);
+      $'Connected to {conn}'.Println;
+      
+      while true do
+      try
+        var fname := ReceiveFile(conn.CreateReader);
+        $'Running [{fname}]'.Println;
+        SubExecuters.RunFile(fname, nil,
+          l->Println($'[{fname}]: {l.s}'),
+          e->Println($'[{fname}]: {e}')
+        );
+        $'Finished running [{fname}]'.Println;
+      except
+        on e: Exception do
+          if not conn.IsConnected then
+          begin
+            $'Server disconnected'.Println;
+  //          Println(e);
+            break;
+          end else
+          begin
+            'Test error:'.Println;
+            Println(e);
+          end;
+      end;
+      
     end;
     
   except
