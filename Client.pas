@@ -62,11 +62,12 @@ begin
       end;
       
       var conn := new SockConnection(sock);
-      $'Connected to {conn}'.Println;
+      Console.Title := $'Connected to {conn}'.Println;
       
       while true do
       try
         var fname := ReceiveFile(conn.CreateReader);
+        Console.Clear;
         $'Running [{fname}]'.Println;
         SubExecuters.RunFile(fname, nil,
           l->Println($'[{fname}]: {l.s}'),
