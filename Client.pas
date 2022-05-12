@@ -6,10 +6,9 @@ uses SubExecuters in 'Utils\SubExecuters';
 
 uses NetData;
 
-function ReceiveFile(br: System.IO.BinaryReader): string;
+procedure ReceiveFile(fname: string; br: System.IO.BinaryReader);
 const file_copy_buff_size = 1024*1024*100;
 begin
-  var fname := br.ReadString;
   $'Receiving [{fname}]'.Println;
   System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fname));
   
@@ -27,7 +26,6 @@ begin
   end;
   
   f.Close;
-  Result := fname;
 end;
 
 begin
@@ -64,15 +62,17 @@ begin
       var conn := new SockConnection(sock);
       Console.Title := $'Connected to {conn}'.Println;
       
-      var tested := false;
+      var need_clear := true;
+      var br := conn.CreateReader;
       while true do
       try
-        if tested then
+        var fname := br.ReadString;
+        if need_clear then
         begin
           Console.Clear;
-          tested := false;
+          need_clear := false;
         end;
-        var fname := ReceiveFile(conn.CreateReader);
+        ReceiveFile(fname, br);
         if System.IO.Path.GetExtension(fname) <> '.exe' then continue;
         $'Running [{fname}]'.Println;
         SubExecuters.RunFile(fname, nil,
@@ -80,7 +80,7 @@ begin
           e->Println($'[{fname}]: {e}')
         );
         $'Finished running [{fname}]'.Println;
-        tested := true;
+        need_clear := true;
       except
         on e: Exception do
           if not conn.IsConnected then
