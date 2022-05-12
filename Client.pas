@@ -64,16 +64,23 @@ begin
       var conn := new SockConnection(sock);
       Console.Title := $'Connected to {conn}'.Println;
       
+      var tested := false;
       while true do
       try
+        if tested then
+        begin
+          Console.Clear;
+          tested := false;
+        end;
         var fname := ReceiveFile(conn.CreateReader);
-        Console.Clear;
+        if System.IO.Path.GetExtension(fname) <> '.exe' then continue;
         $'Running [{fname}]'.Println;
         SubExecuters.RunFile(fname, nil,
           l->Println($'[{fname}]: {l.s}'),
           e->Println($'[{fname}]: {e}')
         );
         $'Finished running [{fname}]'.Println;
+        tested := true;
       except
         on e: Exception do
           if not conn.IsConnected then

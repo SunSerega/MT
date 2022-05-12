@@ -69,8 +69,16 @@ begin
 //        end;
         lock to_send do
         begin
-          if del<>nil then to_send.Remove(del);
-          if add<>nil then to_send += add;
+          if del<>nil then
+            to_send.Remove(del);
+          if add<>nil then
+          begin
+            var add_pdb := System.IO.Path.ChangeExtension(add, '.pdb');
+            if FileExists(add_pdb) then
+              to_send += add_pdb;
+            to_send.Remove(add); // move to end
+            to_send += add;
+          end;
         end;
         send_time := DateTime.Now.AddSeconds(0.5);
 //        $'Send at {send_time}:{send_time.Value.Millisecond}'.Println;
