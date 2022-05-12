@@ -76,7 +76,6 @@ begin
             var add_pdb := System.IO.Path.ChangeExtension(add, '.pdb');
             if FileExists(add_pdb) then
               to_send += add_pdb;
-            to_send.Remove(add); // move to end
             to_send += add;
           end;
         end;
@@ -112,7 +111,7 @@ begin
         var fls: array of string;
         lock to_send do
         begin
-          fls := to_send.ToArray;
+          fls := to_send.OrderBy(f->System.IO.Path.GetExtension(f)='.exe').ToArray;
           to_send.Clear;
         end;
         lock output do
